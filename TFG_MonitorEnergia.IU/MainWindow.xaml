@@ -1,0 +1,187 @@
+﻿<Window x:Class="TFG_MonitorEnergia.WpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:TFG_MonitorEnergia.WpfApp.ViewModels"
+        Title="Monitor Energía" Height="680" Width="1050"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <!-- Proxy para poder bindear columnas -->
+        <vm:BindingProxy x:Key="Proxy" Data="{Binding}" />
+    </Window.Resources>
+
+    <DockPanel>
+
+        <Menu DockPanel.Dock="Top">
+            
+            <MenuItem Header="_Archivo">
+                <MenuItem Header="Exportar Excel..." Command="{Binding ExportExcelCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Muestreo">
+                <MenuItem Header="100 ms" Command="{Binding SetIntervalCommand}" CommandParameter="100"/>
+                <MenuItem Header="250 ms" Command="{Binding SetIntervalCommand}" CommandParameter="250"/>
+                <MenuItem Header="500 ms" Command="{Binding SetIntervalCommand}" CommandParameter="500"/>
+                <MenuItem Header="1000 ms" Command="{Binding SetIntervalCommand}" CommandParameter="1000"/>
+                <Separator/>
+                <MenuItem Header="Start" Command="{Binding StartCommand}"/>
+                <MenuItem Header="Stop" Command="{Binding StopCommand}"/>
+                <Separator/>
+                <MenuItem Header="Reset sesión" Command="{Binding ResetCommand}"/>
+            </MenuItem>
+
+            <MenuItem Header="_Vista">
+
+                <MenuItem Header="Refresco UI">
+                    <MenuItem Header="100 ms" Command="{Binding SetUiRefreshCommand}" CommandParameter="100"/>
+                    <MenuItem Header="250 ms" Command="{Binding SetUiRefreshCommand}" CommandParameter="250"/>
+                    <MenuItem Header="500 ms" Command="{Binding SetUiRefreshCommand}" CommandParameter="500"/>
+                    <MenuItem Header="1000 ms" Command="{Binding SetUiRefreshCommand}" CommandParameter="1000"/>
+                    <Separator/>
+                    <MenuItem Header="2000 ms" Command="{Binding SetUiRefreshCommand}" CommandParameter="2000"/>
+                </MenuItem>
+
+                <Separator/>
+
+                <MenuItem Header="Top N apps">
+                    <MenuItem Header="50" Command="{Binding SetTopNCommand}" CommandParameter="50"/>
+                    <MenuItem Header="80" Command="{Binding SetTopNCommand}" CommandParameter="80"/>
+                    <MenuItem Header="100" Command="{Binding SetTopNCommand}" CommandParameter="100"/>
+                    <MenuItem Header="200" Command="{Binding SetTopNCommand}" CommandParameter="200"/>
+                    <MenuItem Header="500" Command="{Binding SetTopNCommand}" CommandParameter="500"/>
+                </MenuItem>
+
+                <Separator/>
+
+                <!-- UNIDADES: ahora sí quedan mutuamente exclusivas -->
+                <MenuItem Header="Unidades energía">
+                    <MenuItem Header="Wh"
+                              IsCheckable="True"
+                              IsChecked="{Binding IsWhChecked}"/>
+                    <MenuItem Header="J"
+                              IsCheckable="True"
+                              IsChecked="{Binding IsJChecked}"/>
+                </MenuItem>
+
+                <Separator/>
+
+                <MenuItem Header="Columnas">
+                    <MenuItem Header="CPU %" IsCheckable="True" IsChecked="{Binding ColCpuPercent}"/>
+                    <MenuItem Header="PIDs sesión" IsCheckable="True" IsChecked="{Binding ColPids}"/>
+                    <MenuItem Header="Proc now" IsCheckable="True" IsChecked="{Binding ColProcNow}"/>
+                    <MenuItem Header="W (inst.)" IsCheckable="True" IsChecked="{Binding ColWattsNow}"/>
+                    <MenuItem Header="W (máx.)" IsCheckable="True" IsChecked="{Binding ColWattsMax}"/>
+                    <MenuItem Header="Energía" IsCheckable="True" IsChecked="{Binding ColEnergy}"/>
+                </MenuItem>
+
+            </MenuItem>
+        </Menu>
+
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusLeft}"/>
+            </StatusBarItem>
+            <Separator/>
+            <StatusBarItem>
+                <TextBlock Text="{Binding StatusRight}"/>
+            </StatusBarItem>
+        </StatusBar>
+
+        <TabControl Margin="10">
+
+            <TabItem Header="Monitor">
+                <Grid>
+                    <!-- Importante: IsReadOnly = False para permitir editar solo la 1ª columna -->
+                    <DataGrid ItemsSource="{Binding Apps}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="False"
+                              CanUserResizeColumns="True"
+                              CanUserSortColumns="True"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              EnableRowVirtualization="True"
+                              EnableColumnVirtualization="True"
+                              RowHeaderWidth="0"
+                              FontSize="12">
+
+                        <DataGrid.Columns>
+
+                            <!-- Editable con doble click -->
+                            <DataGridTextColumn Header="Aplicación (editable)"
+                                                Binding="{Binding DisplayName, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                                IsReadOnly="False"
+                                                Width="2*" MinWidth="240"/>
+
+                            <DataGridTextColumn Header="CPU %"
+                                                Binding="{Binding LastCpuPercent, StringFormat={}{0:0.00}}"
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ColCpuPercent, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Width="80"/>
+
+                            <DataGridTextColumn Header="PIDs sesión"
+                                                Binding="{Binding ProcessCount}"
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ColPids, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Width="90"/>
+
+                            <DataGridTextColumn Header="Proc now"
+                                                Binding="{Binding LastSeenProcessCount}"
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ColProcNow, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Width="80"/>
+
+                            <DataGridTextColumn Header="W (inst.)"
+                                                Binding="{Binding LastAllocatedWatts, StringFormat={}{0:0.0}}"
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ColWattsNow, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Width="95"/>
+
+                            <DataGridTextColumn Header="W (máx.)"
+                                                Binding="{Binding MaxWatts, StringFormat={}{0:0.0}}"
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ColWattsMax, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Width="95"/>
+
+                            <DataGridTextColumn Header="Energía"
+                                                Binding="{Binding EnergyDisplay}"
+                                                IsReadOnly="True"
+                                                Visibility="{Binding Data.ColEnergy, Source={StaticResource Proxy}, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                Width="130"/>
+
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Coste">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" FontSize="16" FontWeight="SemiBold"
+                               Text="Estimación de coste energético (sesión)"/>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,0">
+                        <TextBlock VerticalAlignment="Center" Text="Precio electricidad (€/kWh): " />
+                        <TextBox Width="120"
+                                 Text="{Binding PricePerKwh, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:0.###}}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Orientation="Vertical" Margin="0,12,0,0">
+                        <TextBlock Text="{Binding CostSummaryLine1}" FontSize="13"/>
+                        <TextBlock Text="{Binding CostSummaryLine2}" FontSize="13"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="3" Margin="0,16,0,0" Foreground="Gray"
+                               TextWrapping="Wrap"
+                               Text="Nota: el coste se calcula a partir de la energía total acumulada (Wh) de CPU+GPU durante la sesión."/>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+
+    </DockPanel>
+</Window>
