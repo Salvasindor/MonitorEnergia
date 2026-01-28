@@ -101,7 +101,7 @@ public sealed class EnergyMonitorCore : IDisposable
      ))
      .ToList();
 
-        // 🔑 Sumatorio REAL de CPU% (antes de truncar)
+        //  Sumatorio REAL de CPU% (antes de truncar)
         var totalCpuPercent = groupedAll.Sum(a => a.CpuPercentSum);
 
         // Top-N solo para mostrar / exportar
