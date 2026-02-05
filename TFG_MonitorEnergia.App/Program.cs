@@ -25,7 +25,7 @@ namespace TFG_MonitorEnergia.App
 
             while (running)
             {
-                // --- Gestión de teclas ---
+                //Gestión de teclas
                 while (Console.KeyAvailable)
                 {
                     var key = Console.ReadKey(true).Key;
@@ -71,7 +71,7 @@ namespace TFG_MonitorEnergia.App
                 if (!running)
                     break;
 
-                // --- Refresco ---
+                // Refresco
                 if (!paused)
                 {
                     var data = sampler.ReadAll();
