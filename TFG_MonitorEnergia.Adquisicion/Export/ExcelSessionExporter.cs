@@ -31,9 +31,9 @@ public static class ExcelSessionExporter
 
         using var wb = new XLWorkbook();
 
-        // =====================================================
+        
         // Sheet 1: Summary
-        // =====================================================
+    
         var wsSummary = wb.Worksheets.Add("Summary");
         int r = 1;
 
@@ -111,9 +111,9 @@ public static class ExcelSessionExporter
 
         wsSummary.Columns().AdjustToContents();
 
-        // =====================================================
+      
         // Sheet 2: Apps
-        // =====================================================
+      
         var wsApps = wb.Worksheets.Add("Apps");
 
         wsApps.Cell(1, 1).Value = "AppName";
@@ -141,9 +141,9 @@ public static class ExcelSessionExporter
 
         wsApps.Columns().AdjustToContents();
 
-        // =====================================================
+   
         // Sheet 3: Timeline_Total
-        // =====================================================
+      
         var wsTime = wb.Worksheets.Add("Timeline_Total");
 
         wsTime.Cell(1, 1).Value = "TimestampUtc";
@@ -175,9 +175,9 @@ public static class ExcelSessionExporter
 
         wsTime.Columns().AdjustToContents();
 
-        // =====================================================
+     
         // Sheet 4: Peaks_Events
-        // =====================================================
+      
         var wsEv = wb.Worksheets.Add("Peaks_Events");
 
         wsEv.Cell(1, 1).Value = "TimestampUtc";
@@ -203,9 +203,8 @@ public static class ExcelSessionExporter
 
         wsEv.Columns().AdjustToContents();
 
-        // =====================================================
         // Guardar archivo
-        // =====================================================
+       
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
         wb.SaveAs(outputPath);
 
