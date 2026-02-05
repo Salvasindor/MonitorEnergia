@@ -5,7 +5,7 @@ using TFG_MonitorEnergia.Hardware;
 
 namespace TFG_MonitorEnergia.Core;
 
-/// <summary>
+
 /// Core definitivo:
 /// - Mide dt real con Stopwatch (jitter incluido)
 /// - Lee CPU% por proceso (CpuUsageSampler)
@@ -14,7 +14,7 @@ namespace TFG_MonitorEnergia.Core;
 /// - Agrupa por app (nombre) por tick
 /// - Reparte CPU_W_total proporcional al CPU% por app
 /// - Devuelve TickSnapshot (deltas), NO guarda sesión
-/// </summary>
+
 public sealed class EnergyMonitorCore : IDisposable
 {
     private readonly CpuUsageSampler _cpuSampler;
@@ -33,20 +33,18 @@ public sealed class EnergyMonitorCore : IDisposable
         _cpuSampler = new CpuUsageSampler();
         _lhm = new LhmSampler();
         _lhm.Open();
-
-        // baseline (muy importante para CpuUsageSampler)
         _cpuSampler.Tick();
 
         _lastSeconds = _sw.Elapsed.TotalSeconds;
     }
 
-    /// <summary>
+  
     /// Ejecuta un tick de cálculo y devuelve un snapshot inmutable listo para SessionData.
     /// Si el dt es inválido o no hay datos coherentes, devuelve null.
-    /// </summary>
+
     public TickSnapshot? ExecuteTick()
     {
-        // dt real (jitter)
+        // dt real 
         var nowSeconds = _sw.Elapsed.TotalSeconds;
         var dt = nowSeconds - _lastSeconds;
         _lastSeconds = nowSeconds;
@@ -69,7 +67,7 @@ public sealed class EnergyMonitorCore : IDisposable
             ))
             .ToList();
 
-        // 2) Potencias totales (W)
+        //  Potencias totales (W)
         var cpuWattsRaw = _lhm.GetCpuPackagePowerWatts() ?? 0.0;
         var gpuWattsRaw = _lhm.GetGpuPackagePowerWatts() ?? 0.0;
 
@@ -80,7 +78,7 @@ public sealed class EnergyMonitorCore : IDisposable
         if (!IsFinite(gpuWattsRaw) || gpuWattsRaw < Options.MinGpuWatts || gpuWattsRaw > Options.MaxGpuWatts)
             gpuWattsRaw = 0.0;
 
-        // 3) Filtrado EMA CPU total
+        //  Filtrado EMA CPU total
         double? cpuWattsFiltered = null;
         double cpuWattsForAllocation = cpuWattsRaw;
 
@@ -90,7 +88,7 @@ public sealed class EnergyMonitorCore : IDisposable
             cpuWattsForAllocation = cpuWattsFiltered.Value;
         }
 
-        // 4) Agrupación por app (por tick)
+        //  Agrupación por app (por tick)
         var groupedAll = procs
      .GroupBy(p => p.AppName, StringComparer.OrdinalIgnoreCase)
      .Select(g => new AppAgg(
@@ -101,7 +99,7 @@ public sealed class EnergyMonitorCore : IDisposable
      ))
      .ToList();
 
-        //  Sumatorio REAL de CPU% (antes de truncar)
+        //  Sumatorio REAL de CPU% 
         var totalCpuPercent = groupedAll.Sum(a => a.CpuPercentSum);
 
         // Top-N solo para mostrar / exportar
@@ -136,10 +134,10 @@ public sealed class EnergyMonitorCore : IDisposable
             ));
         }
 
-        // 6) Energía GPU total por tick (sin reparto)
+        // 6) Energía GPU total por tick
         var gpuDeltaJTotal = gpuWattsRaw * dt;
 
-        // Orden final estilo Task Manager (por potencia instantánea)
+        // Orden final estilo Task Manager 
         appRows = appRows
             .OrderByDescending(r => r.CpuWattsNow)
             .ToList();
@@ -176,7 +174,6 @@ public sealed class EnergyMonitorCore : IDisposable
     {
         tauSeconds = Math.Max(0.001, tauSeconds);
 
-        // alpha = 1 - exp(-dt/tau)
         var alpha = 1.0 - Math.Exp(-dt / tauSeconds);
 
         if (_cpuEmaWatts is null)
@@ -195,8 +192,6 @@ public sealed class EnergyMonitorCore : IDisposable
     {
         _lhm.Dispose();
     }
-
-    // ===== Tipos internos =====
 
     private readonly record struct ProcRow(int Pid, string AppName, double CpuPercent);
 
