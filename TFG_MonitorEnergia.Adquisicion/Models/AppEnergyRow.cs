@@ -1,12 +1,10 @@
 ﻿namespace TFG_MonitorEnergia.SessionData.Models;
 
-/// <summary>
 /// Fila final (sesión) por aplicación: esto es lo que consume WPF y export.
-/// Mantiene nombres compatibles con tu export anterior:
+/// Mantiene nombres compatibles
 /// - LastAllocatedWatts = W instantáneos actuales
 /// - ProcessCount = PIDs distintos vistos en sesión
 /// - LastSeenProcessCount = procesos activos en el tick actual
-/// </summary>
 public sealed record AppEnergyRow(
     string AppName,
     double LastCpuPercent,
