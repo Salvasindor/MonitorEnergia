@@ -7,14 +7,14 @@ using TFG_MonitorEnergia.SessionData.Models;
 
 namespace TFG_MonitorEnergia.SessionData.Storage;
 
-/// <summary>
-/// Memoria de sesión:
-/// - acumula energía total (CPU/GPU)
-/// - acumula energía por app
-/// - guarda máximos
-/// - cuenta PIDs distintos por app (HashSet)
-/// - guarda nombres de CPU/GPU (identidad del equipo)
-/// </summary>
+/// 
+/// Memoria de sesión
+///  acumula energía total (CPU/GPU)
+///  cumula energía por app
+///  guarda máximos
+/// -cuenta PIDs distintos por app (HashSet)
+///  guarda nombres de CPU/GPU (identidad del equipo)
+/// 
 public sealed class SessionDataStore
 {
     private readonly object _lock = new();
@@ -28,21 +28,21 @@ public sealed class SessionDataStore
     private double _lastGpuW;
     private double _sessionSeconds;
 
-    // ===== Identidad HW (WMI) =====
+    // Identidad HW (WMI)
     private string? _cpuName;
     private string? _gpuName;
 
-    // ===== Sesión =====
+    // Sesión
     private DateTime _sessionStartUtc = DateTime.UtcNow;
     private DateTime _lastTickUtc = DateTime.UtcNow;
 
-    // ===== Estadística dt (jitter) =====
+    // Estadística dt 
     private double _dtMin = double.MaxValue;
     private double _dtMax = 0;
     private double _dtSum = 0;
     private long _dtCount = 0;
 
-    // ===== Picos =====
+    // Picos 
     private double _cpuPeakW = 0;
     private DateTime _cpuPeakUtc = DateTime.MinValue;
     private double _gpuPeakW = 0;
@@ -50,7 +50,7 @@ public sealed class SessionDataStore
     private double _totalPeakW = 0;
     private DateTime _totalPeakUtc = DateTime.MinValue;
 
-    // ===== Timeline agregado 1s =====
+    //  Timeline agregado 1s 
     private readonly List<TimelineTotalPoint> _timelineTotal = new();
 
     // “bucket” de 1 segundo
@@ -60,12 +60,10 @@ public sealed class SessionDataStore
     private double _bucketCpuWattSeconds = 0.0;
     private double _bucketGpuWattSeconds = 0.0;
 
-    // ===== Eventos =====
+    //  Eventos 
     private readonly List<PeakEvent> _events = new();
-
-    // ======================
+   
     // Identidad hardware
-    // ======================
     public void SetHardwareNames(string? cpuName, string? gpuName)
     {
         lock (_lock)
@@ -84,9 +82,8 @@ public sealed class SessionDataStore
         }
     }
 
-    // ======================
+   
     // Métricas de sesión
-    // ======================
     public (DateTime StartUtc, DateTime EndUtc) GetSessionBoundsUtc()
     {
         lock (_lock)
@@ -168,16 +165,16 @@ public sealed class SessionDataStore
         }
     }
 
-    /// <summary>
-    /// Aplica un snapshot del Core (delta de tick).
-    /// </summary>
+
+    /// Aplica un snapshot del Core 
+
     public void ApplySnapshot(TickSnapshot snap)
     {
         lock (_lock)
         {
             _sessionSeconds += snap.DeltaSeconds;
 
-            // Potencias "actuales"
+            // Potencias 
             _lastCpuW = snap.CpuWattsFiltered ?? snap.CpuWattsRaw;
             _lastGpuW = snap.GpuWattsRaw;
 
@@ -187,14 +184,14 @@ public sealed class SessionDataStore
 
             _lastTickUtc = DateTime.UtcNow;
 
-            // dt stats (jitter)
+            // dt stats 
             var dt = snap.DeltaSeconds;
             _dtMin = Math.Min(_dtMin, dt);
             _dtMax = Math.Max(_dtMax, dt);
             _dtSum += dt;
             _dtCount++;
 
-            // Peaks (CPU/GPU/Total)
+            // Peaks 
             var cpuW = snap.CpuWattsFiltered ?? snap.CpuWattsRaw;
             var gpuW = snap.GpuWattsRaw;
             var totalW = cpuW + gpuW;
@@ -203,7 +200,7 @@ public sealed class SessionDataStore
             if (gpuW > _gpuPeakW) { _gpuPeakW = gpuW; _gpuPeakUtc = _lastTickUtc; _events.Add(new PeakEvent(_lastTickUtc, _sessionSeconds, "GPU_PEAK", null, gpuW, null)); }
             if (totalW > _totalPeakW) { _totalPeakW = totalW; _totalPeakUtc = _lastTickUtc; _events.Add(new PeakEvent(_lastTickUtc, _sessionSeconds, "TOTAL_PEAK", null, totalW, null)); }
 
-            // Timeline agregado a 1 segundo: acumulamos W*dt (watt-seconds)
+            // Timeline agregado a 1 segundo
             _bucketDtSum += dt;
             _bucketCpuWattSeconds += cpuW * dt;
             _bucketGpuWattSeconds += gpuW * dt;
