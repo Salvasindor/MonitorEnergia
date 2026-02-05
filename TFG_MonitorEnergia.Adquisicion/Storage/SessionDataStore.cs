@@ -68,7 +68,7 @@ public sealed class SessionDataStore
     {
         lock (_lock)
         {
-            // Solo guardamos si vienen con texto; así no “pisamos” con null
+            // Solo guardamos si vienen con texto
             if (!string.IsNullOrWhiteSpace(cpuName)) _cpuName = cpuName.Trim();
             if (!string.IsNullOrWhiteSpace(gpuName)) _gpuName = gpuName.Trim();
         }
@@ -159,7 +159,7 @@ public sealed class SessionDataStore
             _bucketCpuWattSeconds = 0;
             _bucketGpuWattSeconds = 0;
 
-            // OJO: si quieres que los nombres permanezcan entre sesiones, comenta estas dos líneas
+            
             _cpuName = null;
             _gpuName = null;
         }
