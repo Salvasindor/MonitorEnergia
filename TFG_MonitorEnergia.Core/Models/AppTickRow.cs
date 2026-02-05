@@ -1,8 +1,8 @@
 ﻿namespace TFG_MonitorEnergia.Core.Models;
 
-/// <summary>
+/// 
 /// Resultado por aplicación para un tick (ya agrupado).
-/// </summary>
+/// 
 public sealed record AppTickRow(
     string AppName,
     int ProcessesNow,                 // nº procesos activos en este tick
