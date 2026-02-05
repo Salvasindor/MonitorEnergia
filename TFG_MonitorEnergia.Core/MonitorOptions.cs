@@ -1,10 +1,10 @@
 ﻿namespace TFG_MonitorEnergia.Core;
 
 /// <summary>
-/// Opciones del motor de cálculo (Core).
+/// Opciones del motor de cálculo 
 /// NOTA: el periodo objetivo (timer) NO va aquí; lo gestiona SessionData.
 /// Aquí solo hay filtrado/validación/capas de cálculo.
-/// </summary>
+
 public sealed class MonitorOptions
 {
     // Validación potencia CPU (W)
