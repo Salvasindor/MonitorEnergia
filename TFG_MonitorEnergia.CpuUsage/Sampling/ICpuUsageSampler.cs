@@ -5,10 +5,10 @@ namespace TFG_MonitorEnergia.CpuUsage.Sampling;
 
 public interface ICpuUsageSampler
 {
-    /// <summary>
+
     /// Toma una muestra y devuelve el uso de CPU por proceso desde el último Tick.
     /// En la primera llamada normalmente devolverá una lista vacía (no hay delta).
-    /// </summary>
+   
     IReadOnlyList<ProcessCpuUsage> Tick();
 
     void Reset();
