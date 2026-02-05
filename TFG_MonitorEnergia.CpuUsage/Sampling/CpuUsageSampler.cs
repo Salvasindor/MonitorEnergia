@@ -11,7 +11,7 @@ public sealed class CpuUsageSampler : ICpuUsageSampler
 {
     private readonly Dictionary<int, ProcessCpuSample> _lastSamplesByPid = new();
 
-    // medimos tiempo real con Stopwatch para que el dt sea estable
+    // se mide tiempo real con Stopwatch para que el dt sea estable
     private long _lastTickTimestamp = -1;
 
     private readonly int _logicalCores;
